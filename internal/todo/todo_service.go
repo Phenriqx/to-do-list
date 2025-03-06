@@ -3,6 +3,7 @@ package todo
 import (
 	"errors"
 	"fmt"
+	//"io"
 	"log"
 	"os"
 
@@ -33,14 +34,14 @@ func LoadTodos(filename string) ([]TodoItem, error) {
 
 	for _, todo := range todos {
 		if todo.ID > lastID {
-            lastID = todo.ID
-        }
+			lastID = todo.ID
+		}
 	}
 	fmt.Println("Loading todos from file...")
 	return todos, nil
 }
 
-func SaveTodo (filename string, todos []TodoItem) error {
+func SaveTodo(filename string, todos []TodoItem) error {
 	jsonData, err := json.MarshalIndent(todos, "", "  ")
 	if err != nil {
 		log.Fatal("Error marshaling JSON:", err)
@@ -49,24 +50,26 @@ func SaveTodo (filename string, todos []TodoItem) error {
 	return os.WriteFile(filename, jsonData, 0644)
 }
 
-func CreateTodo (title string, description string) TodoItem {
+func CreateTodo(title string, description string) TodoItem {
 	lastID++
 	return TodoItem{
-        ID:          lastID,
-        Title:       title,
-        Description: description,
-        Completed: 	 false,
-    }
-}
-
-func GetTodos () (TodoItem, error) {
-	if len(todos) == 0 {
-		return TodoItem{}, errors.New("No todos found")
+		ID:          lastID,
+		Title:       title,
+		Description: description,
+		Completed:   false,
 	}
-	return todos[len(todos)-1], nil
 }
 
-func GetTodoByID (id uint) (TodoItem, error) {
+func GetTodos(filename string) ([]TodoItem, error) {
+	var todos []TodoItem
+	fileData, err := os.ReadFile(filename)
+	if err != nil {
+        return nil, err
+    }
+	return todos, json.Unmarshal(fileData, &todos)
+}
+
+func GetTodoByID(id uint) (TodoItem, error) {
 	for _, todo := range todos {
 		if todo.ID == id {
 			return todo, nil

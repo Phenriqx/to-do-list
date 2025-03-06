@@ -2,7 +2,9 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"log"
+
 	// "errors"
 	"fmt"
 	"os"
@@ -15,8 +17,8 @@ func main() {
 	filename := "data/todos.json"
 	todos, err := todo.LoadTodos(filename)
 	if err != nil {
-        log.Fatal("Error loading todos:", err)
-    }
+		log.Fatal("Error loading todos:", err)
+	}
 
 	commands := []string{
 		"create",
@@ -50,14 +52,20 @@ func main() {
 
 		fmt.Println("Created todo with ID:", todo_item.ID)
 
-	case command == "get\n":
-		todo, err := todo.GetTodos()
+	case command == "get":
+		todo_items, err := todo.GetTodos(filename)
 		if err != nil {
-            log.Fatal("Error getting todos:", err)
-        }
-		fmt.Println(todo)
+			log.Fatal("Error getting todos:", err)
+		}
+		// Formmat the output for better readability
+		var buffer bytes.Buffer
+		for _, todo := range todo_items {
+			buffer.WriteString(fmt.Sprintf("ID: %d,\n Title: %s,\n Description: %s,\n Completed: %t\n", 
+			todo.ID, todo.Title, todo.Description, todo.Completed))
+		}
+		fmt.Println(buffer.String())
 
-	case command == "get by ID\n":
+	case command == "get by ID":
 		idStr, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal("Error reading ID:", err)
@@ -73,9 +81,9 @@ func main() {
 		}
 		fmt.Println(todo)
 
-	case command == "update\n":
+	case command == "update":
 		fmt.Println("Update command not implemented yet.")
-	case command == "delete\n":
+	case command == "delete":
 		fmt.Println("Delete command not implemented yet.")
 	default:
 		fmt.Printf("Invalid command: %s. Please try again.\n", command)
