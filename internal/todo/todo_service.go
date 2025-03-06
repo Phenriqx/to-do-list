@@ -1,42 +1,76 @@
 package todo
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"os"
 
-	//"encoding/json"
-	"bufio"
+	// "bufio"
+	"encoding/json"
 )
 
-func CreateTodo() (TodoItem) {
+func LoadTodos(filename string) ([]TodoItem, error) {
+	var todos []TodoItem
+
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		if os.IsNotExist(err) {
+			// if the file does not exist, create an empty slice
+			return []TodoItem{}, nil
+		}
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return []TodoItem{}, nil
+	}
+
+	err = json.Unmarshal(data, &todos)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, todo := range todos {
+		if todo.ID > lastID {
+            lastID = todo.ID
+        }
+	}
+	fmt.Println("Loading todos from file...")
+	return todos, nil
+}
+
+func SaveTodo (filename string, todos []TodoItem) error {
+	jsonData, err := json.MarshalIndent(todos, "", "  ")
+	if err != nil {
+		log.Fatal("Error marshaling JSON:", err)
+	}
+	fmt.Println("Saving todos to file...")
+	return os.WriteFile(filename, jsonData, 0644)
+}
+
+func CreateTodo (title string, description string) TodoItem {
 	lastID++
-
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter your todo title:")
-	title, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading title:", err)
-        os.Exit(1)
-    } else if title == "" || len(title) <= 1 {
-		fmt.Println("Invalid title. Please try again.")
-	    os.Exit(1)
-	}
-
-	fmt.Println("Enter your todo description:")
-	description, err := reader.ReadString('\n')
-	if err != nil {
-		fmt.Println("Error reading description:", err)
-		os.Exit(1)
-	} else if description == "" || len(description) <= 1 {
-		fmt.Println("Invalid description. Please try again.")
-        os.Exit(1)
-	}
-
-	todo := TodoItem {
-		ID: lastID,
-        Title: title,
+	return TodoItem{
+        ID:          lastID,
+        Title:       title,
         Description: description,
-        Completed: false,
+        Completed: 	 false,
+    }
+}
+
+func GetTodos () (TodoItem, error) {
+	if len(todos) == 0 {
+		return TodoItem{}, errors.New("No todos found")
 	}
-	return todo
+	return todos[len(todos)-1], nil
+}
+
+func GetTodoByID (id uint) (TodoItem, error) {
+	for _, todo := range todos {
+		if todo.ID == id {
+			return todo, nil
+		}
+	}
+	return TodoItem{}, errors.New("Todo not found")
 }
