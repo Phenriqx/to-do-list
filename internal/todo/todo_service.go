@@ -3,7 +3,7 @@ package todo
 import (
 	"errors"
 	"fmt"
-	//"io"
+	// "io"
 	"log"
 	"os"
 
@@ -64,16 +64,15 @@ func GetTodos(filename string) ([]TodoItem, error) {
 	var todos []TodoItem
 	fileData, err := os.ReadFile(filename)
 	if err != nil {
-        return nil, err
-    }
+		return nil, err
+	}
 	return todos, json.Unmarshal(fileData, &todos)
 }
 
-func GetTodoByID(id uint) (TodoItem, error) {
-	for _, todo := range todos {
-		if todo.ID == id {
-			return todo, nil
-		}
+func GetTodoByID (todoMap map[uint]TodoItem, id uint) (TodoItem, error) {
+	todo, exists := todoMap[id]
+	if !exists {
+		return TodoItem{}, errors.New("Todo not found")
 	}
-	return TodoItem{}, errors.New("Todo not found")
+	return todo, nil
 }

@@ -4,5 +4,11 @@
     "title": "new note",
     "description": "this is my new note",
     "completed": false
+  },
+  {
+    "id": 2,
+    "title": "Supermarket",
+    "description": "Buy groceries",
+    "completed": false
   }
 ]

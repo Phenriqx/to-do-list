@@ -36,23 +36,25 @@ func main() {
 	}
 
 	reader := bufio.NewReader(os.Stdin)
-	command := todo.GetInput("Enter a command:")
+	command := todo.GetInput("Enter a command: ")
 
 	switch {
-	case command == "create":
+	case command == "create" || command == "1":
+
 		title := todo.GetInput("Enter the title of the todo:")
 		description := todo.GetInput("Enter the description of the todo:")
 
-		todo_item := todo.CreateTodo(title, description)
-		todos = append(todos, todo_item)
+		newTodo := todo.CreateTodo(title, description)
+		todos = append(todos, newTodo)
 		err := todo.SaveTodo(filename, todos)
 		if err != nil {
 			log.Fatal("Error saving todos:", err)
 		}
 
-		fmt.Println("Created todo with ID:", todo_item.ID)
+		fmt.Println("Created todo with ID:", newTodo.ID)
 
-	case command == "get":
+	case command == "get" || command == "2":
+
 		todo_items, err := todo.GetTodos(filename)
 		if err != nil {
 			log.Fatal("Error getting todos:", err)
@@ -65,7 +67,13 @@ func main() {
 		}
 		fmt.Println(buffer.String())
 
-	case command == "get by ID":
+	case command == "get by ID" || command == "3":
+
+		todoMap, err := todo.GetTodoMap(filename)
+		if err != nil {
+			log.Fatal("Error getting todo map:", err)
+		}
+
 		idStr, err := reader.ReadString('\n')
 		if err != nil {
 			log.Fatal("Error reading ID:", err)
@@ -75,11 +83,17 @@ func main() {
 		if err != nil {
 			log.Fatal("Error parsing ID:", err)
 		}
-		todo, err := todo.GetTodoByID(uint(id))
+		todo, err := todo.GetTodoByID(todoMap, uint(id))
 		if err != nil {
 			log.Fatal("Error getting todo by ID:", err)
 		}
-		fmt.Println(todo)
+
+		var buffer bytes.Buffer
+		buffer.WriteString(fmt.Sprintf("ID: %d,\n Title: %s,\n Description: %s,\n Completed: %t\n",
+				todo.ID, todo.Title, todo.Description, todo.Completed))
+
+		fmt.Println(buffer.String())
+
 
 	case command == "update":
 		fmt.Println("Update command not implemented yet.")
