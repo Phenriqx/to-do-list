@@ -4,8 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-
-	// "io"
+	// "slices"
 	"log"
 	"os"
 
@@ -124,6 +123,45 @@ func UpdateTodo(filename string, id uint, title, description string, completed b
 	err = encoder.Encode(todos)
 	if err != nil {
 		return UpdatedTodo, err
-	}	
+	}
 	return UpdatedTodo, nil
+}
+
+func DeleteTodo(filename string, id uint) error {
+	var todos []TodoItem
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		return errors.New("Error opening file")
+	}
+	defer jsonFile.Close()
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err := json.Unmarshal(byteValue, &todos); err != nil {
+		return err
+	}
+
+	if err := CheckID(id, lastID); err != nil {
+		return errors.New("Error: Index out of range!")
+	}
+
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos = append(todos[:i], todos[i+1:]...) // remove the todo from the slice
+            break
+		}
+	}
+
+	jsonFile, err = os.Create(filename)
+	if err != nil {
+		return err
+	}
+
+	defer jsonFile.Close()
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(todos); err!= nil {
+		return err
+	}
+	
+	return nil
 }

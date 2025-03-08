@@ -104,6 +104,10 @@ func main() {
 		if err != nil {
 			log.Fatal("Error parsing ID:", err)
 		}
+		lastID := todo.GetLastID(todos)
+		if err := todo.CheckID(uint(id), lastID); err != nil {
+			log.Fatal("Index out of range!")
+		}
 
 		title := todo.GetInput("Enter the new title (leave blank to keep the same): ")
 		description := todo.GetInput("Enter the new description (leave blank to keep the same): ")
@@ -121,8 +125,19 @@ func main() {
 		
 		fmt.Println("Updated todo with ID:", todo.ID)
 
-	case command == "delete":
-		fmt.Println("Delete command not implemented yet.")
+	case command == "delete" || command == "5":
+		
+		idStr := todo.GetInput("Enter the ID of the todo to delete: ")
+		id, err := todo.ToInt(idStr)
+		if err != nil {
+			log.Fatal("Error parsing ID:", err)
+		}
+
+		err = todo.DeleteTodo(filename, uint(id))
+		if err != nil {
+            log.Fatal("Error deleting todo:", err)
+        }
+
 	default:
 		fmt.Printf("Invalid command: %s. Please try again.\n", command)
 		os.Exit(1)

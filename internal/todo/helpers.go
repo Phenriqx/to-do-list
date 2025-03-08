@@ -3,6 +3,7 @@ package todo
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -50,7 +51,24 @@ func GetTodoMap(filename string) (map[uint]TodoItem, error) {
 	return todoMap, nil
 }
 
-func ToInt (s string) (int, error) {
+func GetLastID(todos []TodoItem) uint {
+	var lastID uint = 0
+	for _, todo := range todos {
+		if todo.ID > lastID {
+			lastID = todo.ID
+		}
+	}
+	return lastID
+}
+
+func CheckID(id uint, lastID uint) error {
+	if id <= 0 || id > lastID {
+		return errors.New("Error: Index out of range!")
+	}
+	return nil
+}
+
+func ToInt(s string) (int, error) {
 	i, err := strconv.Atoi(s)
 	if err != nil {
 		return 0, err
@@ -58,7 +76,7 @@ func ToInt (s string) (int, error) {
 	return i, nil
 }
 
-func ToBool (s string) (bool, error) {
+func ToBool(s string) (bool, error) {
 	i, err := strconv.ParseBool(s)
 	if err != nil {
 		return false, err

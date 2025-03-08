@@ -1,11 +1,5 @@
 [
   {
-    "id": 1,
-    "title": "new",
-    "description": "new",
-    "completed": true
-  },
-  {
     "id": 2,
     "title": "Supermarket",
     "description": "Buy groceries",
