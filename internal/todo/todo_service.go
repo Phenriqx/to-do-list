@@ -3,6 +3,8 @@ package todo
 import (
 	"errors"
 	"fmt"
+	"io"
+
 	// "io"
 	"log"
 	"os"
@@ -37,7 +39,7 @@ func LoadTodos(filename string) ([]TodoItem, error) {
 			lastID = todo.ID
 		}
 	}
-	fmt.Println("Loading todos from file...")
+	// fmt.Println("Loading todos from file...")
 	return todos, nil
 }
 
@@ -69,10 +71,59 @@ func GetTodos(filename string) ([]TodoItem, error) {
 	return todos, json.Unmarshal(fileData, &todos)
 }
 
-func GetTodoByID (todoMap map[uint]TodoItem, id uint) (TodoItem, error) {
+func GetTodoByID(todoMap map[uint]TodoItem, id uint) (TodoItem, error) {
+	// fmt.Println(todoMap)
 	todo, exists := todoMap[id]
 	if !exists {
 		return TodoItem{}, errors.New("Todo not found")
 	}
 	return todo, nil
+}
+
+func UpdateTodo(filename string, id uint, title, description string, completed bool) (TodoItem, error) {
+	var todos []TodoItem
+	var UpdatedTodo TodoItem
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		return UpdatedTodo, err
+	}
+	defer jsonFile.Close()
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		return UpdatedTodo, err
+	}
+	if err := json.Unmarshal(byteValue, &todos); err != nil {
+		return UpdatedTodo, err
+	}
+
+	found := false
+	for i, todo := range todos {
+		if todo.ID == id {
+			todos[i].Title = title
+			todos[i].Description = description
+			todos[i].Completed = completed
+			UpdatedTodo = todos[i]
+			found = true
+			break
+		}
+	}
+	if !found {
+		return UpdatedTodo, errors.New("Todo not found")
+	}
+
+	// Save the updated todos to the file
+	jsonFile, err = os.Create(filename)
+	if err != nil {
+		return UpdatedTodo, err
+	}
+	defer jsonFile.Close()
+
+	encoder := json.NewEncoder(jsonFile)
+	encoder.SetIndent("", "  ")
+	err = encoder.Encode(todos)
+	if err != nil {
+		return UpdatedTodo, err
+	}	
+	return UpdatedTodo, nil
 }

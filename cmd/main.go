@@ -30,10 +30,12 @@ func main() {
 
 	fmt.Println("Welcome to the TODO App!")
 	fmt.Println("Type one of the following commands:")
+	fmt.Println()
 
 	for index, cmd := range commands {
 		fmt.Printf("%d - %s\n", index+1, cmd)
 	}
+	fmt.Println()
 
 	reader := bufio.NewReader(os.Stdin)
 	command := todo.GetInput("Enter a command: ")
@@ -95,8 +97,30 @@ func main() {
 		fmt.Println(buffer.String())
 
 
-	case command == "update":
-		fmt.Println("Update command not implemented yet.")
+	case command == "update" || command == "4":
+
+		idStr := todo.GetInput("Enter the ID of the todo to update: ")
+		id, err := todo.ToInt(idStr)
+		if err != nil {
+			log.Fatal("Error parsing ID:", err)
+		}
+
+		title := todo.GetInput("Enter the new title (leave blank to keep the same): ")
+		description := todo.GetInput("Enter the new description (leave blank to keep the same): ")
+		completedStr := todo.GetInput("Enter the new completed status (true/false) (leave blank to keep the same): ")
+		completedBool, err := todo.ToBool(completedStr)
+		if err != nil {
+			log.Fatal("Error parsing completed status:", err)
+		}
+
+		todo, err := todo.UpdateTodo(filename, uint(id),
+			title, description, completedBool)
+		if err != nil {
+			log.Fatal("Error updating todo:", err)
+		}
+		
+		fmt.Println("Updated todo with ID:", todo.ID)
+
 	case command == "delete":
 		fmt.Println("Delete command not implemented yet.")
 	default:
@@ -104,11 +128,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// func toInt(s string) (uint, error) {
-// 	i, err := strconv.Atoi(s)
-// 	if err != nil {
-// 		return 0, errors.New("Invalid input. Please enter a valid number.")
-// 	}
-// 	return uint(i), nil
-// }

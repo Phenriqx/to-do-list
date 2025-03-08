@@ -4,10 +4,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"os"
+	"strconv"
 	"strings"
-	"io"
 )
 
 func GetInput(prompt string) string {
@@ -28,19 +29,16 @@ func GetInput(prompt string) string {
 func GetTodoMap(filename string) (map[uint]TodoItem, error) {
 	jsonFile, err := os.Open(filename)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 
 	defer jsonFile.Close()
-	byteValye, err := io.ReadAll(jsonFile)
+	byteValue, err := io.ReadAll(jsonFile)
 	if err != nil {
-		log.Fatal(err)
 		return nil, err
 	}
 	var todos []TodoItem
-	if err := json.Unmarshal(byteValye, &todos); err != nil {
-		log.Fatal(err)
+	if err := json.Unmarshal(byteValue, &todos); err != nil {
 		return nil, err
 	}
 
@@ -50,4 +48,20 @@ func GetTodoMap(filename string) (map[uint]TodoItem, error) {
 		todoMap[todo.ID] = todo
 	}
 	return todoMap, nil
+}
+
+func ToInt (s string) (int, error) {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, err
+	}
+	return i, nil
+}
+
+func ToBool (s string) (bool, error) {
+	i, err := strconv.ParseBool(s)
+	if err != nil {
+		return false, err
+	}
+	return i, nil
 }

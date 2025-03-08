@@ -1,9 +1,9 @@
 [
   {
     "id": 1,
-    "title": "new note",
-    "description": "this is my new note",
-    "completed": false
+    "title": "new",
+    "description": "new",
+    "completed": true
   },
   {
     "id": 2,
