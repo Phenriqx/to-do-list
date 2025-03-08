@@ -15,6 +15,7 @@
 *.vcf
 *.xml
 *.json
+data/*.json
 
 ### dotenv ###
 .env
